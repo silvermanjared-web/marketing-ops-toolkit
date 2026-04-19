@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Intel - industry newsletters",
+    "query": "from:(digest@industry.example.com OR newsletter@martech.example.com OR weekly@analytics.example.com) in:inbox",
+    "label": "INBOX/INTEL",
+    "archive": true,
+    "mark_read": false
+  },
+  {
+    "name": "Receipts - transactional emails",
+    "query": "subject:(\"your receipt\" OR \"order confirmation\" OR \"payment received\" OR \"payment successful\") in:inbox",
+    "label": "INBOX/RECEIPTS",
+    "archive": true,
+    "mark_read": false
+  },
+  {
+    "name": "Receipts - shipping notifications",
+    "query": "subject:(\"has shipped\" OR \"out for delivery\" OR \"package delivered\" OR \"tracking number\") in:inbox",
+    "label": "INBOX/RECEIPTS",
+    "archive": true,
+    "mark_read": true
+  },
+  {
+    "name": "Notifications - calendar and system",
+    "query": "from:(calendar-notification@google.com OR noreply@alerts.example.com OR notifications@system.example.com) in:inbox",
+    "label": "INBOX/NOTIFICATIONS",
+    "archive": true,
+    "mark_read": true
+  },
+  {
+    "name": "Promotions - known marketing senders",
+    "query": "from:(deals@retailer.example.com OR offers@brand.example.com OR promo@store.example.com) in:inbox",
+    "label": "INBOX/PROMOTIONS",
+    "archive": true,
+    "mark_read": true
+  },
+  {
+    "name": "Promotions - alias catch-all",
+    "query": "to:alias@example.com in:inbox",
+    "label": "INBOX/PROMOTIONS",
+    "archive": true,
+    "mark_read": true
+  }
+]

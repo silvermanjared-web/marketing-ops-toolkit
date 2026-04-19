@@ -1,0 +1,15 @@
+developer_token: "INSERT_DEVELOPER_TOKEN"
+client_id: "INSERT_CLIENT_ID.apps.googleusercontent.com"
+client_secret: "INSERT_CLIENT_SECRET"
+refresh_token: "INSERT_REFRESH_TOKEN"
+login_customer_id: "1234567890"
+customer_id: "1234567890"
+use_proto_plus: true
+
+# Optional: classification config for search term analysis
+brand_terms:
+  - "acme"
+  - "acme corp"
+competitors:
+  - "competitor-a"
+  - "competitor-b"

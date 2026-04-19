@@ -1,0 +1,22 @@
+# Credentials
+credentials.json
+token.json
+*_token.json
+google-ads.yaml
+client_secret_*.json
+*.pem
+*.key
+
+# Environment
+.env*
+venv/
+__pycache__/
+
+# State & output
+state.json
+output/
+*.log
+
+# IDE
+.vscode/
+.idea/

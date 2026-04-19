@@ -1,0 +1,36 @@
+{
+  "accounts": [
+    {
+      "name": "Acme Corp - US Search",
+      "customer_id": "123-456-7890",
+      "currency": "USD",
+      "timezone": "America/New_York",
+      "notes": "Primary US search campaigns"
+    },
+    {
+      "name": "Acme Corp - Display & Video",
+      "customer_id": "234-567-8901",
+      "currency": "USD",
+      "timezone": "America/New_York",
+      "notes": "Display prospecting and YouTube"
+    },
+    {
+      "name": "Acme Corp - Canada",
+      "customer_id": "345-678-9012",
+      "currency": "CAD",
+      "timezone": "America/Toronto",
+      "notes": "Canadian market campaigns"
+    }
+  ],
+  "mcc_id": "111-222-3333",
+  "brand_terms": [
+    "acme",
+    "acme corp",
+    "acme corporation"
+  ],
+  "competitors": [
+    "competitor-a",
+    "competitor-b",
+    "competitor-c"
+  ]
+}
