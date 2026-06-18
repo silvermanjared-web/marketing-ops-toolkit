@@ -1,42 +1,52 @@
 # Marketing Ops Toolkit
 
-Practical automation scripts for performance marketing operations — inbox management, platform auditing, and reporting workflows.
+Practical automation scripts for performance marketing operations: inbox management, platform auditing, reporting workflows, and repeatable campaign-health checks.
 
-## Problem
+This toolkit is built for operators who need faster diagnosis, cleaner execution, and less manual reporting drag.
 
-Marketing operations teams lose time and budget to predictable failures: campaigns pacing incorrectly, conversion tracking going stale, spend leaking into irrelevant search terms, and reports assembled manually every week. These scripts automate the detection and diagnosis so operators can focus on decisions.
+## Why this exists
+
+Marketing operations teams lose time and budget to predictable failures: campaigns pace incorrectly, conversion tracking goes stale, spend leaks into irrelevant search terms, and reports get assembled manually every week.
+
+These scripts automate detection and diagnosis so operators can focus on decisions.
+
+The goal is not to replace judgment. The goal is to surface issues earlier, reduce manual review, and make recurring workflows more reliable.
 
 ## Components
 
-### Inbox Automation (`src/inbox/`)
-Rule-based email processing using the Gmail API. Categorizes, labels, archives, and prioritizes messages in batch — processing thousands of emails in single API calls.
+### Inbox automation (`src/inbox/`)
 
-- **Rule engine** with configurable pattern matching (sender, subject, keywords)
-- **Batch processing** — labels and archives up to 1,000 messages per API call  
-- **State persistence** — tracks progress across runs, resumes where it left off
-- **Dry-run mode** — preview changes before applying
+Rule-based email processing using the Gmail API. Categorizes, labels, archives, and prioritizes messages in batch.
 
-### Platform Audit (`src/audit/`)
-Automated health checks for Google Ads accounts.
+- **Rule engine** — configurable pattern matching by sender, subject, and keywords
+- **Batch processing** — labels and archives messages efficiently through API calls
+- **State persistence** — tracks progress across runs and resumes where it left off
+- **Dry-run mode** — previews changes before applying them
 
-- **Campaign structure audit** — hierarchy validation, naming convention checks
+### Platform audit (`src/audit/`)
+
+Automated health checks for Google Ads accounts and paid media operations.
+
+- **Campaign structure audit** — hierarchy validation and naming-convention checks
 - **Budget pacing** — spend vs. target tracking with alert thresholds
-- **Conversion tracking audit** — validates tracking setup, identifies gaps
+- **Conversion tracking audit** — validates tracking setup and identifies gaps
 - **Search term analysis** — waste identification and negative keyword recommendations
 
 ### Reporting (`src/reporting/`)
-Executive briefing generation from platform data.
+
+Executive briefing generation from platform and workflow data.
 
 - **Performance summary** — key metrics with period-over-period comparison
 - **Anomaly flagging** — statistical deviation detection across campaigns
-- **Formatted output** — generates clean reports (PDF, Markdown, or console)
+- **Formatted output** — clean summaries for Markdown, PDF, console, or downstream reporting
 
 ## Stack
 
 - Python 3.12+
 - Google Ads API (`google-ads`)
 - Gmail API (`google-api-python-client`)
-- No frameworks, no ORMs, no unnecessary abstraction
+- Local configuration files
+- No unnecessary framework layer
 
 ## Usage
 
@@ -62,12 +72,19 @@ cp config/ads_accounts.example.json config/ads_accounts.json
 cp config/google-ads.example.yaml config/google-ads.yaml
 ```
 
-See [config/README.md](config/README.md) for setup instructions.
+See [`config/README.md`](config/README.md) for setup instructions.
 
-## Design Philosophy
+Do not commit local credentials, tokens, private account IDs, exports, or sensitive campaign data.
+
+## Design philosophy
 
 - **Single-purpose scripts** — each file does one thing well
-- **Batch over loop** — minimize API calls, maximize throughput
+- **Batch over loop** — minimize API calls and maximize throughput
 - **Dry-run everything** — preview before modifying
-- **State machines** — resume-safe, idempotent operations
-- **No magic** — explicit configuration, readable code
+- **State machines** — support resume-safe, idempotent operations
+- **No magic** — keep configuration explicit and code readable
+- **Operator-first automation** — make the next decision easier, not just the next report faster
+
+## What this demonstrates
+
+This repo shows how recurring marketing operations problems can be turned into practical, reusable automation: structured inbox handling, platform-health checks, reporting workflows, and operating discipline around paid media execution.
