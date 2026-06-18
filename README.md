@@ -68,19 +68,7 @@ Executive briefing generation from platform and workflow data.
 
 ## Usage
 
-```bash
-# Gmail inbox automation
-python -m src.inbox.accelerator --dry        # Preview what would change
-python -m src.inbox.accelerator              # Process inbox
-
-# Google Ads audit
-python -m src.audit.campaign_health          # Campaign structure check
-python -m src.audit.conversion_tracking      # Tracking validation
-python -m src.audit.search_terms             # Waste analysis
-
-# Reporting
-python -m src.reporting.exec_brief           # Generate executive summary
-```
+Use the toolkit for Gmail inbox automation, Google Ads audits, and executive reporting workflows. Start in dry-run or preview mode before applying changes.
 
 ## Example output
 
@@ -88,21 +76,17 @@ See [`examples/example-run.md`](examples/example-run.md) for mock dry-run output
 
 ## Configuration
 
-```bash
-cp config/gmail_rules.example.json config/gmail_rules.json
-cp config/ads_accounts.example.json config/ads_accounts.json
-cp config/google-ads.example.yaml config/google-ads.yaml
-```
-
 See [`config/README.md`](config/README.md) for setup instructions.
 
 Do not commit local credentials, tokens, private account IDs, exports, or sensitive campaign data.
 
 ## Related repos
 
-- [`growth-architecture-os`](https://github.com/silvermanjared-web/growth-architecture-os) — the operating-system hub that explains the broader growth architecture.
-- [`marketing-ops-playbooks`](https://github.com/silvermanjared-web/marketing-ops-playbooks) — the documented methods and validation frameworks behind many toolkit workflows.
-- [`marketing-intelligence-agent`](https://github.com/silvermanjared-web/marketing-intelligence-agent) — the intelligence and monitoring layer that can use toolkit outputs for briefings and triage.
+This repo is part of a connected public system. See the [GitHub Ecosystem Map](https://github.com/silvermanjared-web/growth-architecture-os/blob/main/docs/ecosystem-map.md) for how the repos relate.
+
+- [`growth-architecture-os`](https://github.com/silvermanjared-web/growth-architecture-os)
+- [`marketing-ops-playbooks`](https://github.com/silvermanjared-web/marketing-ops-playbooks)
+- [`marketing-intelligence-agent`](https://github.com/silvermanjared-web/marketing-intelligence-agent)
 
 ## Design philosophy
 
