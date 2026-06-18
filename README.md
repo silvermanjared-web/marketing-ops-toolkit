@@ -64,6 +64,10 @@ python -m src.audit.search_terms             # Waste analysis
 python -m src.reporting.exec_brief           # Generate executive summary
 ```
 
+## Example output
+
+See [`examples/example-run.md`](examples/example-run.md) for mock dry-run output covering inbox automation, campaign-health checks, audit findings, and recommended follow-up actions.
+
 ## Configuration
 
 ```bash
