@@ -12,6 +12,24 @@ These scripts automate detection and diagnosis so operators can focus on decisio
 
 The goal is not to replace judgment. The goal is to surface issues earlier, reduce manual review, and make recurring workflows more reliable.
 
+## Workflow
+
+```mermaid
+flowchart LR
+    Inputs[Operational inputs] --> DryRun[Dry-run preview]
+    DryRun --> Review[Human review]
+    Review --> Apply[Apply approved actions]
+    Apply --> Report[Structured report]
+    Report --> Decision[Next decision]
+
+    Inputs --> Inbox[Inbox automation]
+    Inputs --> Audit[Platform audit]
+    Inputs --> Brief[Executive briefing]
+    Inbox --> DryRun
+    Audit --> DryRun
+    Brief --> Report
+```
+
 ## Components
 
 ### Inbox automation (`src/inbox/`)
