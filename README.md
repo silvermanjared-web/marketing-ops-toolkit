@@ -98,6 +98,12 @@ See [`config/README.md`](config/README.md) for setup instructions.
 
 Do not commit local credentials, tokens, private account IDs, exports, or sensitive campaign data.
 
+## Related repos
+
+- [`growth-architecture-os`](https://github.com/silvermanjared-web/growth-architecture-os) — the operating-system hub that explains the broader growth architecture.
+- [`marketing-ops-playbooks`](https://github.com/silvermanjared-web/marketing-ops-playbooks) — the documented methods and validation frameworks behind many toolkit workflows.
+- [`marketing-intelligence-agent`](https://github.com/silvermanjared-web/marketing-intelligence-agent) — the intelligence and monitoring layer that can use toolkit outputs for briefings and triage.
+
 ## Design philosophy
 
 - **Single-purpose scripts** — each file does one thing well
