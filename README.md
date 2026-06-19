@@ -30,6 +30,19 @@ flowchart LR
     Brief --> Report
 ```
 
+## Executable scripts
+
+These are the active scripts this repo exposes today.
+
+| Script | Command | What it does | Safety posture |
+|---|---|---|---|
+| Gmail Inbox Accelerator | `python -m src.inbox.accelerator --dry` | Loads configurable Gmail rules, searches matching messages, and previews label/archive actions | Use `--dry` before any write run |
+| Inbox status check | `python -m src.inbox.accelerator --status` | Prints current state, rule index, labeled count, archived count, errors, runs, and last run | Read-only |
+| Inbox state reset | `python -m src.inbox.accelerator --reset` | Removes local processing state so the next run starts from rule 0 | Local state only |
+| Google Ads Campaign Health Audit | `python -m src.audit.campaign_health --days 30` | Pulls Google Ads campaign data and checks budget pacing, conversion health, impression share, naming, auto-tagging, and status anomalies | Read-only API workflow |
+
+Reporting workflows are represented in the repo as output patterns and operating guidance. They are not positioned here as a separate production reporting application unless backed by an executable script.
+
 ## Components
 
 ### Inbox automation (`src/inbox/`)
@@ -50,13 +63,13 @@ Automated health checks for Google Ads accounts and paid media operations.
 - **Conversion tracking audit** — validates tracking setup and identifies gaps
 - **Search term analysis** — waste identification and negative keyword recommendations
 
-### Reporting (`src/reporting/`)
+### Reporting patterns (`examples/` and downstream output)
 
-Executive briefing generation from platform and workflow data.
+Structured reporting examples show how script output can be translated into operator-ready summaries. These examples are public-safe mock outputs, not live account exports.
 
-- **Performance summary** — key metrics with period-over-period comparison
-- **Anomaly flagging** — statistical deviation detection across campaigns
-- **Formatted output** — clean summaries for Markdown, PDF, console, or downstream reporting
+- **Performance summary patterns** — key metrics with period-over-period comparison
+- **Anomaly framing** — deviation flags translated into review questions
+- **Formatted output** — clean summaries for Markdown, console, or downstream reporting
 
 ## Stack
 
@@ -68,11 +81,19 @@ Executive briefing generation from platform and workflow data.
 
 ## Usage
 
-Use the toolkit for Gmail inbox automation, Google Ads audits, and executive reporting workflows. Start in dry-run or preview mode before applying changes.
+Start in dry-run or read-only mode before applying changes.
+
+```bash
+python -m src.inbox.accelerator --dry
+python -m src.inbox.accelerator --status
+python -m src.audit.campaign_health --days 30
+```
+
+Use write-capable inbox workflows only after reviewing the dry-run output and confirming the rule configuration.
 
 ## Example output
 
-See [`examples/example-run.md`](examples/example-run.md) for mock dry-run output covering inbox automation, campaign-health checks, audit findings, and recommended follow-up actions.
+See [`examples/example-run.md`](examples/example-run.md) for mock dry-run output covering the real command shapes, state behavior, campaign-health checks, audit findings, and recommended follow-up actions.
 
 ## Configuration
 
@@ -103,4 +124,4 @@ Usage and rights: see [USAGE.md](USAGE.md).
 
 ## What this demonstrates
 
-This repo shows how recurring marketing operations problems can be turned into practical, reusable automation: structured inbox handling, platform-health checks, reporting workflows, and operating discipline around paid media execution.
+This repo shows how recurring marketing operations problems can be turned into practical, reusable automation: structured inbox handling, platform-health checks, reporting patterns, and operating discipline around paid media execution.
