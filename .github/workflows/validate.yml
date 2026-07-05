@@ -1,0 +1,35 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate marketing ops toolkit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run repository guardrails
+        run: python scripts/validate_repo.py
+
+      - name: Compile Python modules
+        run: python -m py_compile $(git ls-files "*.py")
+
+      - name: Validate example JSON configs
+        run: |
+          python -m json.tool config/gmail_rules.example.json >/dev/null
+          python -m json.tool config/ads_accounts.example.json >/dev/null
