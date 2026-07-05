@@ -122,7 +122,7 @@ DEFAULT_RULES: list[Rule] = [
         ),
         label="INBOX/RECEIPTS",
         archive=True,
-        mark_read=True,
+        mark_read=False,
     ),
     Rule(
         name="Notifications - calendar and system",
@@ -133,7 +133,7 @@ DEFAULT_RULES: list[Rule] = [
         ),
         label="INBOX/NOTIFICATIONS",
         archive=True,
-        mark_read=True,
+        mark_read=False,
     ),
     Rule(
         name="Promotions - known marketing senders",
@@ -144,14 +144,7 @@ DEFAULT_RULES: list[Rule] = [
         ),
         label="INBOX/PROMOTIONS",
         archive=True,
-        mark_read=True,
-    ),
-    Rule(
-        name="Promotions - alias catch-all",
-        query="to:alias@example.com in:inbox",
-        label="INBOX/PROMOTIONS",
-        archive=True,
-        mark_read=True,
+        mark_read=False,
     ),
 ]
 

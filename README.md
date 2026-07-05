@@ -36,7 +36,8 @@ These are the active scripts this repo exposes today.
 
 | Script | Command | What it does | Safety posture |
 |---|---|---|---|
-| Gmail Inbox Accelerator | `python -m src.inbox.accelerator --dry` | Loads configurable Gmail rules, searches matching messages, and previews label/archive actions | Use `--dry` before any write run |
+| Gmail Inbox Accelerator preview | `python -m src.inbox.accelerator` | Loads configurable Gmail rules, searches matching messages, and previews label/archive actions | Dry run by default; no Gmail or local state changes are saved |
+| Gmail Inbox Accelerator apply | `python -m src.inbox.accelerator --apply` | Applies reviewed rules to Gmail labels, archive state, and read state if configured | Write-capable; run only after preview review |
 | Inbox status check | `python -m src.inbox.accelerator --status` | Prints current state, rule index, labeled count, archived count, errors, runs, and last run | Read-only |
 | Inbox state reset | `python -m src.inbox.accelerator --reset` | Removes local processing state so the next run starts from rule 0 | Local state only |
 | Google Ads Campaign Health Audit | `python -m src.audit.campaign_health --days 30` | Pulls Google Ads campaign data and checks budget pacing, conversion health, impression share, naming, auto-tagging, and status anomalies | Read-only API workflow |
@@ -52,7 +53,7 @@ Rule-based email processing using the Gmail API. Categorizes, labels, archives, 
 - **Rule engine** — configurable pattern matching by sender, subject, and keywords
 - **Batch processing** — labels and archives messages efficiently through API calls
 - **State persistence** — tracks progress across runs and resumes where it left off
-- **Dry-run mode** — previews changes before applying them
+- **Dry-run mode** — previews changes without modifying Gmail or local state
 
 ### Platform audit (`src/audit/`)
 
@@ -84,12 +85,12 @@ Structured reporting examples show how script output can be translated into oper
 Start in dry-run or read-only mode before applying changes.
 
 ```bash
-python -m src.inbox.accelerator --dry
+python -m src.inbox.accelerator
 python -m src.inbox.accelerator --status
 python -m src.audit.campaign_health --days 30
 ```
 
-Use write-capable inbox workflows only after reviewing the dry-run output and confirming the rule configuration.
+Use `python -m src.inbox.accelerator --apply` only after reviewing the dry-run output and confirming the rule configuration. Avoid broad catch-all inbox rules, and treat `mark_read` as an explicit opt-in for narrow, low-risk message classes.
 
 ## Example output
 

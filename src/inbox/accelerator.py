@@ -6,8 +6,9 @@ Gmail messages. Processes up to 1,000 messages per API call using
 batchModify. Maintains state across runs so it can resume where it left off.
 
 Usage:
-    python -m src.inbox.accelerator              # Process inbox
-    python -m src.inbox.accelerator --dry        # Preview changes (no writes)
+    python -m src.inbox.accelerator              # Preview changes (no writes)
+    python -m src.inbox.accelerator --apply      # Apply approved rules
+    python -m src.inbox.accelerator --dry        # Explicit preview mode
     python -m src.inbox.accelerator --status     # Print current state
     python -m src.inbox.accelerator --reset      # Reset state to start over
     python -m src.inbox.accelerator --config config/gmail_rules.json
@@ -176,26 +177,34 @@ def run_accelerator(rules: list[Rule], dry_run: bool = False) -> None:
         - For each rule, searches for matching messages and applies actions
         - If a rule matches messages, re-runs it until exhausted (handles
           inboxes with >1,000 matching messages per rule)
-        - Saves state after each batch so processing resumes on next run
+        - Saves state after each applied batch so processing resumes on next run
         - Stops after MAX_RUNTIME_SEC to stay within scheduler limits
+
+    Dry-run mode is intentionally non-mutating: it does not apply Gmail
+    changes and does not advance or save local processing state.
     """
     service = get_gmail_service()
     state = load_state()
+    if dry_run:
+        state = dict(state)
     start_time = time.time()
 
-    state["runs"] += 1
-    run_num = state["runs"]
+    run_num = state["runs"] + 1
 
     print(
-        f"Run #{run_num} | phase={state['phase']} | "
+        f"{'Preview' if dry_run else 'Run'} #{run_num} | phase={state['phase']} | "
         f"rule={state['rule_index']}/{len(rules) - 1} | "
         f"labeled={state['labeled']} | archived={state['archived']}"
     )
 
     if state["phase"] == "done":
         print("All rules processed. Nothing to do. Use --reset to start over.")
-        save_state(state)
+        if not dry_run:
+            save_state(state)
         return
+
+    if not dry_run:
+        state["runs"] = run_num
 
     label_id_cache: dict[str, str] = {}
     consecutive_errors = 0
@@ -228,18 +237,20 @@ def run_accelerator(rules: list[Rule], dry_run: bool = False) -> None:
             print(f"Rule {idx} ({rule.name}): no matches, advancing.")
             state["rule_index"] += 1
             consecutive_errors = 0
-            save_state(state)
+            if not dry_run:
+                save_state(state)
             continue
 
         # Dry run — report what would happen
         if dry_run:
             print(
                 f"[DRY RUN] Rule {idx} ({rule.name}): "
-                f"would process {len(message_ids)} messages"
+                f"would label {len(message_ids)} messages"
+                f"{', archive' if rule.archive else ''}"
+                f"{', mark read' if rule.mark_read else ''}"
             )
             state["rule_index"] += 1
             consecutive_errors = 0
-            save_state(state)
             continue
 
         # Apply the rule
@@ -270,18 +281,22 @@ def run_accelerator(rules: list[Rule], dry_run: bool = False) -> None:
                 break
             time.sleep(2)
 
-        save_state(state)
+        if not dry_run:
+            save_state(state)
 
     # Finalize
-    state["last_run"] = datetime.now(timezone.utc).isoformat()
-    save_state(state)
+    if not dry_run:
+        state["last_run"] = datetime.now(timezone.utc).isoformat()
+        save_state(state)
 
     elapsed = round(time.time() - start_time)
     print(
-        f"Run #{run_num} complete | {elapsed}s | "
+        f"{'Preview' if dry_run else 'Run'} #{run_num} complete | {elapsed}s | "
         f"labeled={state['labeled']} | archived={state['archived']} | "
         f"errors={state['errors']} | next_rule={state['rule_index']}"
     )
+    if dry_run:
+        print("Dry run only. No Gmail changes or local state changes were saved.")
 
 
 # ── CLI ──────────────────────────────────────────────────────────────────────
@@ -312,7 +327,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--dry", action="store_true",
-        help="Dry run — preview what would change without modifying anything",
+        help="Explicit dry run — preview without Gmail or local state changes",
+    )
+    parser.add_argument(
+        "--apply", action="store_true",
+        help="Apply approved rules to Gmail. Without this flag, the command is a dry run.",
     )
     parser.add_argument(
         "--status", action="store_true",
@@ -328,6 +347,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    if args.dry and args.apply:
+        parser.error("Use either --dry or --apply, not both.")
+
     if args.status:
         print_status()
         sys.exit(0)
@@ -338,7 +360,9 @@ def main() -> None:
 
     rules = get_rules(args.config)
     print(f"Loaded {len(rules)} rules")
-    run_accelerator(rules, dry_run=args.dry)
+    if not args.apply:
+        print("Dry-run mode. Add --apply only after reviewing the rule output.")
+    run_accelerator(rules, dry_run=not args.apply)
 
 
 if __name__ == "__main__":

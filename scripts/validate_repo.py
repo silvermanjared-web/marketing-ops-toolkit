@@ -20,7 +20,7 @@ SECRET_PATTERNS = [
     re.compile(r"BEGIN (RSA|OPENSSH|PRIVATE) KEY"),
 ]
 SENSITIVE_NAME = re.compile(
-    r"(^|/)(\.env(\..*)?|\.env\.keys|client_secret.*\.json|credentials.*\.json|token.*\.json|tokens.*\.json|google[-_]ads\.ya?ml)$",
+    r"(^|/)(\.env(\..*)?|\.env\.keys|client_secret.*\.json|credentials.*\.json|token.*\.json|tokens.*\.json|google[-_]ads\.ya?ml|state\.json)$",
     re.IGNORECASE,
 )
 ALLOW_TRACKED = {
@@ -29,6 +29,16 @@ ALLOW_TRACKED = {
 }
 SKIP_DIRS = {".git", "node_modules", "venv", ".venv", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"}
 TEXT_SUFFIXES = {".py", ".md", ".txt", ".json", ".yaml", ".yml", ".toml", ".sh", ".css", ".js", ".ts", ".html"}
+UNSAFE_SAMPLE_PATTERNS = {
+    "config/gmail_rules.example.json": [
+        (re.compile(r'"mark_read"\s*:\s*true', re.IGNORECASE), "Sample Gmail rules should not mark messages read by default"),
+        (re.compile(r'"query"\s*:\s*"to:[^"]+@[^"]+in:inbox"', re.IGNORECASE), "Sample Gmail rules should not use broad alias catch-all queries"),
+    ],
+    "src/inbox/rules.py": [
+        (re.compile(r"mark_read\s*=\s*True"), "Built-in Gmail rules should not mark messages read by default"),
+        (re.compile(r"query\s*=\s*[\"']to:[^\"']+@[^\"']+in:inbox[\"']", re.IGNORECASE), "Built-in Gmail rules should not use broad alias catch-all queries"),
+    ],
+}
 
 def git(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(["git", *args], cwd=ROOT, text=True, capture_output=True, check=False)
@@ -72,6 +82,11 @@ def main() -> int:
         for pattern in SECRET_PATTERNS:
             if pattern.search(text):
                 failures.append(f"Secret-like pattern in {rel}: {pattern.pattern}")
+                break
+
+        for pattern, message in UNSAFE_SAMPLE_PATTERNS.get(rel, []):
+            if pattern.search(text):
+                failures.append(f"{message}: {rel}")
                 break
 
     status = git(["status", "--short"]).stdout.strip()

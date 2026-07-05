@@ -6,10 +6,12 @@
 2. Create a project (or select existing)
 3. Enable the **Gmail API**
 4. Create OAuth 2.0 credentials (Desktop application)
-5. Download the credentials JSON and save as `credentials.json` in the project root
-6. On first run, a browser window will open for authorization — the resulting token is saved as `token.json`
+5. Download the credentials JSON and save it as an ignored local file named `credentials.json`
+6. On first authorization, the resulting token is saved as an ignored local file named `token.json`
 
 Reference: [Gmail API Python Quickstart](https://developers.google.com/gmail/api/quickstart/python)
+
+Do not commit OAuth credentials or tokens. The repository `.gitignore` excludes the default local filenames, but you should still treat them as private machine-local files.
 
 ### Gmail Rules
 
@@ -23,7 +25,9 @@ Edit `gmail_rules.json` to add your own sender patterns, subject filters, and la
 - `query` — Gmail search query (same syntax as the Gmail search bar)
 - `label` — target label (created automatically if it doesn't exist)
 - `archive` — whether to remove from inbox
-- `mark_read` — whether to mark as read
+- `mark_read` — whether to mark as read; keep this `false` unless the rule is narrow and intentionally low-risk
+
+Run the inbox accelerator without flags first. It defaults to a dry run and does not modify Gmail or local processing state. Use `--apply` only after reviewing the matched rules.
 
 ## Google Ads API Setup
 
@@ -44,6 +48,8 @@ Fill in your credentials:
 - `customer_id` — the specific account to audit
 
 Reference: [Google Ads API Authentication](https://developers.google.com/google-ads/api/docs/oauth/overview)
+
+Do not commit `config/google-ads.yaml` or any copied output from live accounts. Public examples should use synthetic account names, IDs, and performance data only.
 
 ### Accounts Config
 

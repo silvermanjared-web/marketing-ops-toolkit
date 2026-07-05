@@ -8,10 +8,10 @@ The purpose of this file is to make the repo easier to inspect. It shows what an
 
 | Workflow | Command | Writes to external system? |
 |---|---|---|
-| Inbox dry run | `python -m src.inbox.accelerator --dry` | No |
+| Inbox dry run | `python -m src.inbox.accelerator` | No |
 | Inbox status | `python -m src.inbox.accelerator --status` | No |
 | Inbox reset | `python -m src.inbox.accelerator --reset` | No external write; resets local state |
-| Inbox apply | `python -m src.inbox.accelerator` | Yes, after OAuth and rule review |
+| Inbox apply | `python -m src.inbox.accelerator --apply` | Yes, after OAuth and rule review |
 | Campaign health audit | `python -m src.audit.campaign_health --days 30` | No; reads Google Ads data |
 
 ## Inbox automation dry run
@@ -19,19 +19,21 @@ The purpose of this file is to make the repo easier to inspect. It shows what an
 ### Command
 
 ```bash
-python -m src.inbox.accelerator --dry
+python -m src.inbox.accelerator
 ```
 
 ### Sample console output
 
 ```text
-Loaded 8 rules
-Run #3 | phase=processing | rule=2/7 | labeled=284 | archived=196
-[DRY RUN] Rule 2 (Platform alerts): would process 91 messages
-[DRY RUN] Rule 3 (Vendor reporting): would process 142 messages
-[DRY RUN] Rule 4 (Low-priority newsletters): would process 178 messages
-Rule 5 (Recruiter and priority contacts): no matches, advancing.
-Run #3 complete | 14s | labeled=284 | archived=196 | errors=0 | next_rule=6
+Loaded 5 rules
+Dry-run mode. Add --apply only after reviewing the rule output.
+Preview #3 | phase=processing | rule=0/4 | labeled=284 | archived=196
+[DRY RUN] Rule 0 (Intel - industry newsletters): would label 91 messages, archive
+[DRY RUN] Rule 1 (Receipts - transactional emails): would label 142 messages, archive
+[DRY RUN] Rule 2 (Receipts - shipping notifications): would label 178 messages, archive
+Rule 3 (Notifications - calendar and system): no matches, advancing.
+Preview #3 complete | 14s | labeled=284 | archived=196 | errors=0 | next_rule=5
+Dry run only. No Gmail changes or local state changes were saved.
 ```
 
 ### Operator readout
@@ -39,8 +41,8 @@ Run #3 complete | 14s | labeled=284 | archived=196 | errors=0 | next_rule=6
 | Review area | Signal | Suggested action |
 |---|---|---|
 | Rule volume | Three rules would touch 411 messages | Confirm rules are scoped correctly before write run |
-| Priority safety | Priority-contact rule had no matches | Confirm this is expected before archiving lower-priority mail |
-| State behavior | Next run resumes from rule 6 | Use `--status` before applying changes |
+| Notification safety | Notification rule had no matches | Confirm this is expected before applying lower-priority mail handling |
+| State behavior | Preview does not save local state | Use `--apply` only after reviewing the preview |
 
 ## Inbox status check
 
@@ -127,5 +129,5 @@ The toolkit is designed to make recurring marketing operations work easier to in
 
 - This example uses mock data.
 - Do not commit live exports, private campaign data, account IDs, credentials, or tokens.
-- Dry-run mode should be used before applying inbox changes.
+- Dry-run mode is the default and should be used before applying inbox changes.
 - Google Ads audit output should be treated as a diagnostic prompt for human review, not as an automated budget decision.
