@@ -6,8 +6,11 @@ google-ads.yaml
 client_secret_*.json
 *.pem
 *.key
+*.p12
+*.pfx
 
 # Environment
+.env
 .env*
 venv/
 __pycache__/
@@ -16,6 +19,9 @@ __pycache__/
 state.json
 output/
 *.log
+*.sqlite
+*.db
+*.hxd
 
 # IDE
 .vscode/
