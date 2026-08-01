@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,40 +47,71 @@ MAX_CONSECUTIVE_ERRORS = 5
 
 # ── Authentication ───────────────────────────────────────────────────────────
 
+def resolve_oauth_file(
+    requested_file: str | Path | None,
+    default_file: Path,
+    legacy_name: str,
+) -> Path:
+    """Resolve an explicit OAuth path or preserve a legacy CWD file."""
+    if requested_file is not None:
+        return Path(requested_file)
+    legacy_file = Path.cwd() / legacy_name
+    if not default_file.exists() and legacy_file.exists():
+        return legacy_file
+    return default_file
+
+
 def write_token_securely(token_file: str | Path, payload: str) -> None:
-    """Write an OAuth token without a permissive creation window."""
-    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-    fd = os.open(token_file, flags, 0o600)
+    """Atomically replace an OAuth token using a mode-0600 sibling file."""
+    token_path = Path(token_file)
+    token_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary_name = tempfile.mkstemp(
+        dir=token_path.parent,
+        prefix=f".{token_path.name}.",
+    )
+    temporary_path = Path(temporary_name)
     try:
-        os.fchmod(fd, 0o600)
-        with os.fdopen(fd, "w") as f:
+        if hasattr(os, "fchmod"):
+            os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             fd = -1
             f.write(payload)
+            f.flush()
+            os.fsync(f.fileno())
+        os.chmod(temporary_path, 0o600)
+        os.replace(temporary_path, token_path)
     finally:
         if fd >= 0:
             os.close(fd)
+        temporary_path.unlink(missing_ok=True)
 
-def get_gmail_service(credentials_file: str | Path = DEFAULT_CREDENTIALS_FILE,
-                      token_file: str | Path = DEFAULT_TOKEN_FILE):
+
+def get_gmail_service(
+    credentials_file: str | Path | None = None,
+    token_file: str | Path | None = None,
+):
     """Authenticate and return a Gmail API service instance.
 
     Uses OAuth2 with offline access. Refreshes expired tokens automatically.
     On first run, opens a browser for consent.
     """
+    credentials_path = resolve_oauth_file(
+        credentials_file, DEFAULT_CREDENTIALS_FILE, "credentials.json"
+    )
+    token_path = resolve_oauth_file(token_file, DEFAULT_TOKEN_FILE, "token.json")
     creds = None
 
-    if os.path.exists(token_file):
-        creds = Credentials.from_authorized_user_file(token_file, SCOPES)
+    if token_path.exists():
+        os.chmod(token_path, 0o600)
+        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(credentials_file, SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             creds = flow.run_local_server(port=0)
-        write_token_securely(token_file, creds.to_json())
+        write_token_securely(token_path, creds.to_json())
 
     return build("gmail", "v1", credentials=creds)
 
@@ -186,7 +218,12 @@ def apply_rule_batch(service, message_ids: list[str], label_id: str,
 
 # ── Main processing loop ─────────────────────────────────────────────────────
 
-def run_accelerator(rules: list[Rule], dry_run: bool = False) -> None:
+def run_accelerator(
+    rules: list[Rule],
+    dry_run: bool = False,
+    credentials_file: str | Path | None = None,
+    token_file: str | Path | None = None,
+) -> None:
     """Process inbox rules in order, batching modifications.
 
     State machine:
@@ -200,7 +237,7 @@ def run_accelerator(rules: list[Rule], dry_run: bool = False) -> None:
     Dry-run mode is intentionally non-mutating: it does not apply Gmail
     changes and does not advance or save local processing state.
     """
-    service = get_gmail_service()
+    service = get_gmail_service(credentials_file, token_file)
     state = load_state()
     if dry_run:
         state = dict(state)
@@ -362,6 +399,14 @@ def main() -> None:
         "--config", type=str, default=None,
         help="Path to JSON rules config (default: use built-in rules)",
     )
+    parser.add_argument(
+        "--credentials-file", type=str, default=None,
+        help="OAuth client credentials path (default: config/credentials.json with CWD fallback)",
+    )
+    parser.add_argument(
+        "--token-file", type=str, default=None,
+        help="OAuth token path (default: config/token.json with CWD fallback)",
+    )
     args = parser.parse_args()
 
     if args.dry and args.apply:
@@ -379,7 +424,12 @@ def main() -> None:
     print(f"Loaded {len(rules)} rules")
     if not args.apply:
         print("Dry-run mode. Add --apply only after reviewing the rule output.")
-    run_accelerator(rules, dry_run=not args.apply)
+    run_accelerator(
+        rules,
+        dry_run=not args.apply,
+        credentials_file=args.credentials_file,
+        token_file=args.token_file,
+    )
 
 
 if __name__ == "__main__":
