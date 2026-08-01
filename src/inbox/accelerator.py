@@ -46,6 +46,21 @@ MAX_CONSECUTIVE_ERRORS = 5
 
 # ── Authentication ───────────────────────────────────────────────────────────
 
+def write_token_securely(token_file: str | Path, payload: str) -> None:
+    """Write an OAuth token without a permissive creation window."""
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    fd = os.open(token_file, flags, 0o600)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w") as f:
+            fd = -1
+            f.write(payload)
+    finally:
+        if fd >= 0:
+            os.close(fd)
+
 def get_gmail_service(credentials_file: str | Path = DEFAULT_CREDENTIALS_FILE,
                       token_file: str | Path = DEFAULT_TOKEN_FILE):
     """Authenticate and return a Gmail API service instance.
@@ -64,9 +79,7 @@ def get_gmail_service(credentials_file: str | Path = DEFAULT_CREDENTIALS_FILE,
         else:
             flow = InstalledAppFlow.from_client_secrets_file(credentials_file, SCOPES)
             creds = flow.run_local_server(port=0)
-        with open(token_file, "w") as f:
-            f.write(creds.to_json())
-        os.chmod(token_file, 0o600)
+        write_token_securely(token_file, creds.to_json())
 
     return build("gmail", "v1", credentials=creds)
 
