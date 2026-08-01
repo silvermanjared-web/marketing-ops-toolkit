@@ -102,6 +102,8 @@ Do not commit local credentials, tokens, private account IDs, exports, or sensit
 
 This repo is part of a connected public system. See the [GitHub Ecosystem Map](https://github.com/silvermanjared-web/growth-architecture-os/blob/main/docs/ecosystem-map.md) for how the repos relate.
 
+This repository is the portfolio's executable utility layer: small tools turn operating standards into repeatable checks and outputs. The [`private-to-public-release-gate`](https://github.com/silvermanjared-web/private-to-public-release-gate) is a specialized governance utility for a narrower risk—preventing private context or unreviewed drift from entering a public derivative. It complements this toolkit's automation philosophy without implying that the toolkit itself is generated from private source.
+
 Shared terminology: [Common Language](https://github.com/silvermanjared-web/growth-architecture-os/blob/main/docs/common-language.md).
 
 Usage and rights: see [USAGE.md](USAGE.md).
@@ -109,6 +111,7 @@ Usage and rights: see [USAGE.md](USAGE.md).
 - [`growth-architecture-os`](https://github.com/silvermanjared-web/growth-architecture-os)
 - [`marketing-ops-playbooks`](https://github.com/silvermanjared-web/marketing-ops-playbooks)
 - [`marketing-intelligence-agent`](https://github.com/silvermanjared-web/marketing-intelligence-agent)
+- [`private-to-public-release-gate`](https://github.com/silvermanjared-web/private-to-public-release-gate)
 
 ## Design philosophy
 
