@@ -35,6 +35,9 @@ from src.inbox.rules import Rule, get_rules
 # ── Constants ────────────────────────────────────────────────────────────────
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
+DEFAULT_CONFIG_DIR = Path(__file__).parent.parent.parent / "config"
+DEFAULT_CREDENTIALS_FILE = DEFAULT_CONFIG_DIR / "credentials.json"
+DEFAULT_TOKEN_FILE = DEFAULT_CONFIG_DIR / "token.json"
 STATE_FILE = "state.json"
 BATCH_SIZE = 1000          # Gmail batchModify limit
 MAX_RUNTIME_SEC = 270      # 4.5 minutes — safe margin for cron/scheduler
@@ -43,8 +46,8 @@ MAX_CONSECUTIVE_ERRORS = 5
 
 # ── Authentication ───────────────────────────────────────────────────────────
 
-def get_gmail_service(credentials_file: str = "credentials.json",
-                      token_file: str = "token.json"):
+def get_gmail_service(credentials_file: str | Path = DEFAULT_CREDENTIALS_FILE,
+                      token_file: str | Path = DEFAULT_TOKEN_FILE):
     """Authenticate and return a Gmail API service instance.
 
     Uses OAuth2 with offline access. Refreshes expired tokens automatically.
@@ -63,6 +66,7 @@ def get_gmail_service(credentials_file: str = "credentials.json",
             creds = flow.run_local_server(port=0)
         with open(token_file, "w") as f:
             f.write(creds.to_json())
+        os.chmod(token_file, 0o600)
 
     return build("gmail", "v1", credentials=creds)
 
