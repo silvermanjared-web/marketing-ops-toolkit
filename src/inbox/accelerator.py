@@ -67,7 +67,8 @@ def write_token_securely(token_file: str | Path, payload: str) -> None:
     token_path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary_name = tempfile.mkstemp(
         dir=token_path.parent,
-        prefix=f".{token_path.name}.",
+        prefix=f"token-{token_path.stem}-",
+        suffix=".json",
     )
     temporary_path = Path(temporary_name)
     try:
