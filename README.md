@@ -6,11 +6,7 @@ This toolkit is built for operators who need faster diagnosis, cleaner execution
 
 ## Why this exists
 
-Marketing operations teams lose time and budget to predictable failures: campaigns pace incorrectly, conversion tracking goes stale, spend leaks into irrelevant search terms, and reports get assembled manually every week.
-
-These scripts automate detection and diagnosis so operators can focus on decisions.
-
-The goal is not to replace judgment. The goal is to surface issues earlier, reduce manual review, and make recurring workflows more reliable.
+Fragmented inbox management, manual campaign health checks, and the absence of a repeatable audit layer pushed operator time into triage instead of decisions. This toolkit replaces recurring manual inspection with dry-run automation, structured checks, and repeatable reporting patterns. It accelerates issue detection without removing human review. These are production-used operating workflows, not a demo collection; public examples use mock output and bounded configurations.
 
 ## Workflow
 
@@ -126,3 +122,5 @@ Usage and rights: see [USAGE.md](USAGE.md).
 ## What this demonstrates
 
 This repo shows how recurring marketing operations problems can be turned into practical, reusable automation: structured inbox handling, platform-health checks, reporting patterns, and operating discipline around paid media execution.
+
+Part of the [Jared Silverman growth portfolio](https://github.com/silvermanjared-web) — see also [Growth Architecture OS](https://github.com/silvermanjared-web/growth-architecture-os) for the operating model context.
