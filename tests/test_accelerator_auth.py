@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fnmatch
 import os
 import sys
 import tempfile
@@ -58,11 +59,30 @@ class AcceleratorAuthTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             token = Path(directory) / "token.json"
             token.write_text("old-token", encoding="utf-8")
-            with mock.patch("os.replace", side_effect=OSError("simulated failure")):
+            temporary_names: list[str] = []
+
+            def fail_replace(source: str | Path, destination: str | Path) -> None:
+                temporary_names.append(Path(source).name)
+                raise OSError("simulated failure")
+
+            with mock.patch("os.replace", side_effect=fail_replace):
                 with self.assertRaisesRegex(OSError, "simulated failure"):
                     accelerator.write_token_securely(token, "new-token")
             self.assertEqual(token.read_text(encoding="utf-8"), "old-token")
-            self.assertEqual(list(token.parent.glob(f".{token.name}.*")), [])
+            self.assertEqual(list(token.parent.glob("token-*.json")), [])
+            self.assertEqual(len(temporary_names), 1)
+            temporary_name = temporary_names[0]
+            self.assertTrue(temporary_name.startswith("token-token-"))
+            self.assertTrue(temporary_name.endswith(".json"))
+            ignore_patterns = {
+                line.strip()
+                for line in accelerator.DEFAULT_CONFIG_DIR.parent.joinpath(".gitignore").read_text().splitlines()
+                if line.strip() and not line.startswith("#")
+            }
+            self.assertTrue(
+                any(fnmatch.fnmatch(temporary_name, pattern) for pattern in ignore_patterns),
+                f"temporary token {temporary_name!r} is not ignored by Git",
+            )
 
     @unittest.skipIf(os.name == "nt", "POSIX mode assertion")
     def test_atomic_write_creates_mode_0600_token(self) -> None:
