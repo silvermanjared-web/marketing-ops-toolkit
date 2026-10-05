@@ -1,0 +1,9 @@
+{
+  "entrypoint": "README.md",
+  "execution_layer": "src/execution/bounded.py",
+  "mutation_reference": "references/bounded-mutations.md",
+  "architecture": "docs/ai-operating-system-reference.md",
+  "governance": "GOVERNANCE.md",
+  "security": "SECURITY.md",
+  "proof": "proof-points.md"
+}
