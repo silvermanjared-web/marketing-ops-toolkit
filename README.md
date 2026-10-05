@@ -1,129 +1,187 @@
-# Marketing Ops Toolkit
+# Marketing Ops Toolkit 2.0
 
-Practical automation scripts for performance marketing operations: inbox management, platform auditing, reporting workflows, and repeatable campaign-health checks.
+**A bounded execution layer for marketing operations.**
 
-This toolkit is built for operators who need faster diagnosis, cleaner execution, and less manual reporting drag.
+This repository turns recurring operational work into inspectable capabilities: platform health checks, inbox workflows, executive artifacts, and narrowly scoped mutations that can be used by humans or AI clients without granting general-purpose authority.
 
-## Why this exists
+The design goal is simple: make ordinary marketing operations faster and more repeatable while keeping writes explicit, constrained, and auditable.
 
-Fragmented inbox management, manual campaign health checks, and the absence of a repeatable audit layer pushed operator time into triage instead of decisions. This toolkit replaces recurring manual inspection with dry-run automation, structured checks, and repeatable reporting patterns. It accelerates issue detection without removing human review. These are production-used operating workflows, not a demo collection; public examples use mock output and bounded configurations.
+## Five-minute proof
 
-## Workflow
+Run:
+
+```bash
+npm test
+python3 -m src.execution.bounded discover
+```
+
+The first command runs smoke, unit, and security tests. The second prints the real execution surface, including five bounded mutation contracts.
+
+Then inspect:
+
+- `src/execution/bounded.py` for capability discovery and bounded execution.
+- `references/bounded-mutations.md` for the five mutation patterns.
+- `src/inbox/accelerator.py` for the existing Gmail workflow.
+- `src/audit/campaign_health.py` for Google Ads health checks.
+- `docs/ai-operating-system-reference.md` for the shared architecture.
+
+## Selected evidence
+
+| Question | Evidence |
+|---|---|
+| Is this more than a bag of scripts? | One deterministic capability registry wraps the operational surface |
+| Can writes stay narrow? | Five named mutation contracts, all confirmation-gated |
+| Can local writes be contained? | Artifact writes are restricted to an admitted output root |
+| Can it operate on real marketing systems? | Existing Gmail and Google Ads workflows remain available through narrow implementations |
+| Can execution be audited? | Every bounded mutation returns a structured receipt |
+| Can an AI client inspect before acting? | Capability discovery exposes effect, description, and confirmation requirements |
+
+## What I built
+
+The toolkit separates diagnosis from execution:
 
 ```mermaid
 flowchart LR
-    Inputs[Operational inputs] --> DryRun[Dry-run preview]
-    DryRun --> Review[Human review]
-    Review --> Apply[Apply approved actions]
-    Apply --> Report[Structured report]
-    Report --> Decision[Next decision]
-
-    Inputs --> Inbox[Inbox automation]
-    Inputs --> Audit[Platform audit]
-    Inputs --> Brief[Executive briefing]
-    Inbox --> DryRun
-    Audit --> DryRun
-    Brief --> Report
+    I[Operational inputs] --> D[Deterministic checks]
+    D --> C[Capability discovery]
+    C --> P[Preview / proposal]
+    P --> A{Authority boundary}
+    A -->|read| O[Observe]
+    A -->|confirmed write| M[Bounded mutation]
+    O --> R[Receipt / operator output]
+    M --> R
+    R --> J[Human judgment / next decision]
 ```
 
-## Executable scripts
+The execution layer does not create a general-purpose mutation interface. It exposes only admitted operations with explicit effect and authority rules.
 
-These are the active scripts this repo exposes today.
+## Core point of view
 
-| Script | Command | What it does | Safety posture |
-|---|---|---|---|
-| Gmail Inbox Accelerator preview | `python -m src.inbox.accelerator` | Loads configurable Gmail rules, searches matching messages, and previews label/archive actions | Dry run by default; no Gmail or local state changes are saved |
-| Gmail Inbox Accelerator apply | `python -m src.inbox.accelerator --apply` | Applies reviewed rules to Gmail labels, archive state, and read state if configured | Write-capable; run only after preview review |
-| Inbox status check | `python -m src.inbox.accelerator --status` | Prints current state, rule index, labeled count, archived count, errors, runs, and last run | Read-only |
-| Inbox state reset | `python -m src.inbox.accelerator --reset` | Removes local processing state so the next run starts from rule 0 | Local state only |
-| Google Ads Campaign Health Audit | `python -m src.audit.campaign_health --days 30` | Pulls Google Ads campaign data and checks budget pacing, conversion health, impression share, naming, auto-tagging, and status anomalies | Read-only API workflow |
+Marketing automation is useful when it reduces repetitive operator work without hiding what changed.
 
-Reporting workflows are represented in the repo as output patterns and operating guidance. They are not positioned here as a separate production reporting application unless backed by an executable script.
+The operating standard is:
 
-## Components
+- deterministic before agentic when the task is deterministic;
+- dry-run before mutation;
+- explicit capability discovery;
+- narrow targets;
+- confirmation for writes;
+- receipts after execution;
+- no invented platform authority;
+- no credential or client data in the public repository;
+- the smallest governance layer that reliably contains risk.
 
-### Inbox automation (`src/inbox/`)
+## Signature framework: bounded mutation
 
-Rule-based email processing using the Gmail API. Categorizes, labels, archives, and prioritizes messages in batch.
+A bounded mutation has five parts:
 
-- **Rule engine** — configurable pattern matching by sender, subject, and keywords
-- **Batch processing** — labels and archives messages efficiently through API calls
-- **State persistence** — tracks progress across runs and resumes where it left off
-- **Dry-run mode** — previews changes without modifying Gmail or local state
+1. **Named capability** — the operation is explicit.
+2. **Known target** — the system cannot wander outside the admitted boundary.
+3. **Accepted inputs** — arguments are constrained.
+4. **Authority rule** — confirmation or an existing admitted contract is required.
+5. **Receipt** — success or refusal is inspectable afterward.
 
-### Platform audit (`src/audit/`)
+## Five bounded mutations
 
-Automated health checks for Google Ads accounts and paid media operations.
+| Mutation | Boundary |
+|---|---|
+| `mutation.inbox_apply` | Existing Gmail rules and narrow apply workflow |
+| `mutation.state_reset` | Local inbox-processing state |
+| `mutation.brief_write` | Admitted output root |
+| `mutation.audit_snapshot` | Admitted output root |
+| `mutation.recommendations_export` | Admitted output root |
 
-- **Campaign structure audit** — hierarchy validation and naming-convention checks
-- **Budget pacing** — spend vs. target tracking with alert thresholds
-- **Conversion tracking audit** — validates tracking setup and identifies gaps
-- **Search term analysis** — waste identification and negative keyword recommendations
+See [Five Bounded Mutation Patterns](references/bounded-mutations.md).
 
-### Reporting patterns (`examples/` and downstream output)
+## Current capability surface
 
-Structured reporting examples show how script output can be translated into operator-ready summaries. These examples are public-safe mock outputs, not live account exports.
+Read operations:
 
-- **Performance summary patterns** — key metrics with period-over-period comparison
-- **Anomaly framing** — deviation flags translated into review questions
-- **Formatted output** — clean summaries for Markdown, console, or downstream reporting
+- `gmail.preview_rules`
+- `ads.campaign_health`
 
-## Stack
+Write operations:
 
-- Python 3.12+
-- Google Ads API (`google-ads`)
-- Gmail API (`google-api-python-client`)
-- Local configuration files
-- No unnecessary framework layer
+- `mutation.inbox_apply`
+- `mutation.state_reset`
+- `mutation.brief_write`
+- `mutation.audit_snapshot`
+- `mutation.recommendations_export`
 
-## Usage
+Run `python3 -m src.execution.bounded discover` for the machine-readable registry.
 
-Start in dry-run or read-only mode before applying changes.
+## Existing marketing operations utilities
+
+The original operational workflows remain useful and are now framed as implementation adapters under the execution layer.
+
+### Gmail
 
 ```bash
-python -m src.inbox.accelerator
-python -m src.inbox.accelerator --status
-python -m src.audit.campaign_health --days 30
+python3 -m src.inbox.accelerator
+python3 -m src.inbox.accelerator --status
+python3 -m src.inbox.accelerator --apply
+python3 -m src.inbox.accelerator --reset
 ```
 
-Use `python -m src.inbox.accelerator --apply` only after reviewing the dry-run output and confirming the rule configuration. Avoid broad catch-all inbox rules, and treat `mark_read` as an explicit opt-in for narrow, low-risk message classes.
+Preview is the default. The apply path changes Gmail state.
 
-## Example output
+### Google Ads
 
-See [`examples/example-run.md`](examples/example-run.md) for mock dry-run output covering the real command shapes, state behavior, campaign-health checks, audit findings, and recommended follow-up actions.
+```bash
+python3 -m src.audit.campaign_health --days 30
+```
 
-## Configuration
+Campaign-health checks remain read-only.
 
-See [`config/README.md`](config/README.md) for setup instructions.
+## AI and MCP interoperability
 
-Do not commit local credentials, tokens, private account IDs, exports, or sensitive campaign data.
+The execution contract is client-neutral. ChatGPT, Claude, CLI tooling, or an MCP-compatible client can expose the same capabilities while preserving their effect and confirmation requirements.
+
+Protocol transport does not expand authority.
+
+See [AI Operating System Reference](docs/ai-operating-system-reference.md).
+
+## Ecosystem map
+
+This repository is the execution layer in the broader [Growth Architecture OS](https://github.com/silvermanjared-web/growth-architecture-os) portfolio.
+
+- **Growth Architecture OS**: leadership and operating philosophy.
+- **Marketing Intelligence Agent**: signal synthesis, routing, and intelligence.
+- **Marketing Ops Toolkit**: deterministic execution and bounded mutation.
+- **AI Context & Design System**: structured context and implementation handoff.
+- **Private-to-Public Release Gate**: privacy-safe publication boundary.
+
+The canonical shared architecture lives in [AI Operating System Reference](https://github.com/silvermanjared-web/growth-architecture-os/tree/main/04-ai-systems/ai-operating-system-reference).
+
+## How to read this repo
+
+For a quick technical proof, run `npm test` and inspect `src/execution/bounded.py`.
+
+For marketing utility, inspect `src/inbox/`, `src/audit/`, and `src/reporting/`.
+
+For execution philosophy, read `references/bounded-mutations.md`.
+
+For safety and authority, read `GOVERNANCE.md`, `SECURITY.md`, `CHATGPT.md`, and `CLAUDE.md`.
+
+For evidence boundaries, read `proof-points.md`.
+
+## Further reading
+
+- [Bounded Mutations](references/bounded-mutations.md)
+- [AI Operating System Reference](docs/ai-operating-system-reference.md)
+- [Proof Points](proof-points.md)
+- [Security Policy](SECURITY.md)
+- [Usage and IP](USAGE.md)
 
 ## Related repos
 
-This repo is part of a connected public system. See the [GitHub Ecosystem Map](https://github.com/silvermanjared-web/growth-architecture-os/blob/main/docs/ecosystem-map.md) for how the repos relate.
+- [Growth Architecture OS](https://github.com/silvermanjared-web/growth-architecture-os)
+- [Marketing Intelligence Agent](https://github.com/silvermanjared-web/marketing-intelligence-agent)
+- [Private-to-Public Release Gate](https://github.com/silvermanjared-web/private-to-public-release-gate)
+- [AI Context & Design System](https://github.com/silvermanjared-web/brand-context-system)
 
-This repository is the portfolio's executable utility layer: small tools turn operating standards into repeatable checks and outputs. The [`private-to-public-release-gate`](https://github.com/silvermanjared-web/private-to-public-release-gate) is a specialized governance utility for a narrower risk—preventing private context or unreviewed drift from entering a public derivative. It complements this toolkit's automation philosophy without implying that the toolkit itself is generated from private source.
+## IP and usage
 
-Shared terminology: [Common Language](https://github.com/silvermanjared-web/growth-architecture-os/blob/main/docs/common-language.md).
+This repository is public for professional review and portfolio context. It is not licensed for commercial reuse, resale, model training, or derivative productization without permission.
 
-Usage and rights: see [USAGE.md](USAGE.md).
-
-- [`growth-architecture-os`](https://github.com/silvermanjared-web/growth-architecture-os)
-- [`marketing-ops-playbooks`](https://github.com/silvermanjared-web/marketing-ops-playbooks)
-- [`marketing-intelligence-agent`](https://github.com/silvermanjared-web/marketing-intelligence-agent)
-- [`private-to-public-release-gate`](https://github.com/silvermanjared-web/private-to-public-release-gate)
-
-## Design philosophy
-
-- **Single-purpose scripts** — each file does one thing well
-- **Batch over loop** — minimize API calls and maximize throughput
-- **Dry-run everything** — preview before modifying
-- **State machines** — support resume-safe, idempotent operations
-- **No magic** — keep configuration explicit and code readable
-- **Operator-first automation** — make the next decision easier, not just the next report faster
-
-## What this demonstrates
-
-This repo shows how recurring marketing operations problems can be turned into practical, reusable automation: structured inbox handling, platform-health checks, reporting patterns, and operating discipline around paid media execution.
-
-Part of the [Jared Silverman growth portfolio](https://github.com/silvermanjared-web) — see also [Growth Architecture OS](https://github.com/silvermanjared-web/growth-architecture-os) for the operating model context.
+See [USAGE.md](USAGE.md).
