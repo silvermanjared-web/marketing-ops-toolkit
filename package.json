@@ -1,0 +1,13 @@
+{
+  "name": "marketing-ops-toolkit",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Bounded execution layer for marketing operations, platform audits, inbox workflows, and operator-ready artifacts.",
+  "scripts": {
+    "smoke": "python3 scripts/smoke.py",
+    "test:unit": "python3 -m unittest tests.test_execution_layer",
+    "test:security": "python3 -m unittest tests.test_execution_security",
+    "test": "npm run smoke && npm run test:unit && npm run test:security"
+  },
+  "license": "UNLICENSED"
+}
