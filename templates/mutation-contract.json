@@ -1,0 +1,8 @@
+{
+  "name": "mutation.brief_write",
+  "effect": "write",
+  "requires_confirmation": true,
+  "boundary": "admitted output root",
+  "inputs": ["relative_path", "content"],
+  "returns": "structured receipt"
+}
