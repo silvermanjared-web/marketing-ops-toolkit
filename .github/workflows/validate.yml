@@ -32,6 +32,9 @@ jobs:
       - name: Compile Python modules
         run: python -m py_compile $(git ls-files "*.py")
 
+      - name: Run bounded execution smoke, unit, and security tests
+        run: npm test
+
       - name: Validate example JSON configs
         run: |
           python -m json.tool config/gmail_rules.example.json >/dev/null
